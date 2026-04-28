@@ -312,6 +312,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans
         <div class="help-row"><kbd>↑</kbd><kbd>↓</kbd> Cycle options</div>
         <div class="help-row"><kbd>←</kbd> Strikethrough focused</div>
         <div class="help-row"><kbd>→</kbd> Select option</div>
+        <div class="help-row"><kbd>→ →</kbd> Select option and next question</div>
         <div class="help-row"><kbd>Enter</kbd> Confirm &amp; Next</div>
         <div class="help-row"><kbd>Space</kbd> Select / deselect</div>
       </div>
@@ -325,21 +326,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans
     <div class="home-hero">
       <div class="home-badge">☁️ AWS Certification Prep</div>
       <h1>AWS Study Hub</h1>
-      <div class="tagline">Practice exams built for the real AWS certification experience.</div>
-      <div class="sub">Domain-weighted scoring, scaled 100–1000 results like the real exam, and curated question banks covering Cloud Practitioner fundamentals through specialty topics.</div>
+      <div class="tagline">Practice exams and review sheets the real AWS certification experience.</div>
+      <div class="sub">Domain-weighted scoring, scaled 100–1000 results like the real exam, and curated question banks covering Cloud Practitioner fundamentals through specialty topics. <br><br> This is what I personally created to study, and I passed the exam 1st try. Hope this helps! <br> <br> If you want to create more practice quizzes, scroll to the bottom!</div>
     </div>
 
     <div class="home-stats">
       <div class="home-stat"><div class="num">500+</div><div class="lbl">Practice Questions</div></div>
-      <div class="home-stat"><div class="num">7</div><div class="lbl">Full-length Exams</div></div>
-      <div class="home-stat"><div class="num">4</div><div class="lbl">CLF-C02 Domains</div></div>
-      <div class="home-stat"><div class="num">700</div><div class="lbl">Passing Score</div></div>
+      <div class="home-stat"><div class="num">7</div><div class="lbl">Practice Exams</div></div>
     </div>
 
     <div class="exam-pills">
       <span class="exam-pill active"><span class="dot"></span>Cloud Practitioner (CLF-C02)</span>
-      <span class="exam-pill"><span class="dot"></span>AI Practitioner (AIF-C01)</span>
-      <span class="exam-pill"><span class="dot"></span>More coming soon</span>
     </div>
 
     <div class="home-cards">
@@ -714,21 +711,19 @@ function handleFile(file) {
 // ══════════════════════════════════════
 // Add new quizzes/guides here — paths are relative to index.html
 const QUIZ_LIBRARY = [
-  { name: 'Cloud Practitioner Final Exam', path: 'Cloud Practitioner Final Exam.md' },
+  { name: 'Cloud Practitioner Final Exam', path: 'quizzes/Cloud Practitioner Final Exam.md' },
   { name: 'Cloud Practitioner Test 1', path: 'quizzes/Cloud Practitioner Test 1.md' },
   { name: 'Cloud Practitioner Test 2', path: 'quizzes/Cloud Practitioner Test 2.md' },
   { name: 'Cloud Practitioner Test 3', path: 'quizzes/Cloud Practitioner Test 3.md' },
   { name: 'Cloud Practitioner Test 4 — Hard', path: 'quizzes/Cloud Practitioner Test 4 - Hard.md' },
   { name: 'Cloud Practitioner — Realistic', path: 'quizzes/Cloud Practitioner Test - Realistic.md' },
   { name: 'Cloud Practitioner — Key Topics', path: 'quizzes/Cloud Practitioner Test - Key Topics.md' },
-  { name: 'AWS ML and AI Services Quiz', path: 'quizzes/AWS ML and AI Services Quiz.md' },
-  { name: 'MA Drivers Permit Practice Test', path: 'MA Drivers Permit Practice Test.md' }
+  { name: 'AWS ML and AI Services Quiz', path: 'quizzes/AWS ML and AI Services Quiz.md' }
 ];
 const REVIEW_LIBRARY = [
   { name: 'AWS Rapid Fire Cheatsheet', path: 'learning/AWS Rapid Fire Cheatsheet.md' },
   { name: 'AWS Key Topics Deep Dive', path: 'learning/AWS Key Topics Deep Dive.md' },
-  { name: 'AWS ML and AI Services', path: 'learning/AWS ML and AI Services.md' },
-  { name: 'MA Drivers Permit Study Guide', path: 'learning/MA Drivers Permit Study Guide.md' }
+  { name: 'AWS ML and AI Services', path: 'learning/AWS ML and AI Services.md' }
 ];
 
 function renderLibrary(containerId, countId, items, onPick) {
@@ -747,12 +742,15 @@ function renderLibrary(containerId, countId, items, onPick) {
       container.querySelectorAll('.library-item').forEach(el => el.classList.remove('selected'));
       div.classList.add('selected');
       try {
-        const res = await fetch(item.path);
+        // Encode each path segment so spaces and unicode (em-dash) work on static hosts
+        const encodedPath = item.path.split('/').map(encodeURIComponent).join('/');
+        const res = await fetch(encodedPath, { cache: 'no-cache' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
         onPick(item, text);
       } catch (err) {
-        alert(`Could not load "${item.name}".\n\nThis usually means you're opening the file directly from disk (file://). Host it on a web server or a static site (GitHub Pages, Netlify, etc.) so the browser can fetch it.`);
+        console.error('Fetch failed for', item.path, err);
+        alert(`Could not load "${item.name}".\n\nPath: ${item.path}\nError: ${err.message}\n\nIf you're opening this from disk (file://), host it on a web server or a static site (GitHub Pages, Netlify, etc.) so the browser can fetch it.`);
         div.classList.remove('selected');
       }
     });
